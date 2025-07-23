@@ -34,7 +34,7 @@ export default function safeApiHandler<
 
 export const structuredResponse = <T extends object>(
 	res: Response,
-	props: StructuredResponseType<T>
+	props: Pick<StructuredResponseType<T>, "statusCode" | "data">
 ) =>
 	res.status(props.statusCode).json({
 		statusCode: props.statusCode,
