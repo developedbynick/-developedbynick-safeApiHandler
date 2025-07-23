@@ -1,4 +1,4 @@
-import { DataPayloadLocation, SafeApiHandlerProps } from "./types";
+import { DataPayloadLocation, SafeApiHandlerProps, StructuredResponseType } from "./types";
 import { NextFunction, Request, Response } from "express";
 import { BadRequest } from "http-errors";
 import { z } from "zod";
@@ -31,3 +31,14 @@ export default function safeApiHandler<
 		}
 	};
 }
+
+export const structuredResponse = <T extends object>(
+	res: Response,
+	props: StructuredResponseType<T>
+) =>
+	res.status(props.statusCode).json({
+		statusCode: props.statusCode,
+		date: new Date().toLocaleDateString(),
+		environment: process.env.NODE_ENV,
+		data: props.data,
+	});

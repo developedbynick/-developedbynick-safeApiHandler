@@ -22,7 +22,7 @@ export type SafeApiHandlerProps<
 			PayloadLocation extends "body" ? z.infer<ZSchema> : {},
 			PayloadLocation extends "query" ? z.infer<ZSchema> : {}
 		>,
-		res: Response<StructuredResponseType>,
+		res: Response,
 		next: NextFunction
 	) => void;
 	arcjetDecision?: ArcjetDecisionProps<ZSchema extends z.ZodType ? z.infer<ZSchema> : unknown>;
@@ -31,9 +31,9 @@ export type SafeApiHandlerProps<
 	location?: PayloadLocation;
 };
 
-export type StructuredResponseType = {
+export type StructuredResponseType<Payload extends object> = {
 	statusCode: number;
 	date: string;
 	environment: "development" | "production" | "preview";
-	data: object;
+	data: Payload;
 };
