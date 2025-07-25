@@ -4,28 +4,24 @@ import z from "zod";
 
 export type DataPayloadLocation = "body" | "query" | "params";
 
-export type ArcjetDecisionProps<TData extends object | unknown> = (args: {
-	req: Request;
-	data: TData | unknown;
+export type ArcjetDecisionProps<Req extends Request<any, any, any, any>> = (args: {
+	req: Req;
 	fingerprint: string;
-}) => ArcjetDecision;
+}) => Promise<ArcjetDecision>;
 
 export type SafeApiHandlerProps<
 	ZSchema extends z.ZodType, //
 	IsProtected extends boolean,
-	PayloadLocation extends DataPayloadLocation
+	PayloadLocation extends DataPayloadLocation,
+	Req extends Request<
+		PayloadLocation extends "params" ? z.infer<ZSchema> : {}, //
+		undefined,
+		PayloadLocation extends "body" ? z.infer<ZSchema> : {},
+		PayloadLocation extends "query" ? z.infer<ZSchema> : {}
+	>
 > = {
-	handler: (
-		req: Request<
-			PayloadLocation extends "params" ? z.infer<ZSchema> : {}, //
-			undefined,
-			PayloadLocation extends "body" ? z.infer<ZSchema> : {},
-			PayloadLocation extends "query" ? z.infer<ZSchema> : {}
-		>,
-		res: Response,
-		next: NextFunction
-	) => void;
-	arcjetDecision?: ArcjetDecisionProps<ZSchema extends z.ZodType ? z.infer<ZSchema> : unknown>;
+	handler: (req: Req, res: Response, next: NextFunction) => void;
+	arcjetDecision?: ArcjetDecisionProps<Req>;
 	validator?: ZSchema;
 	isProtected?: IsProtected;
 	location?: PayloadLocation;
