@@ -4,7 +4,7 @@ import z from "zod";
 
 export type DataPayloadLocation = "body" | "query" | "params";
 
-export type ArcjetDecisionProps<Req extends Request<any, any, any, any>> = (args: {
+export type ArcjetDecisionProps<Req> = (args: {
 	req: Req;
 	fingerprint: string;
 }) => Promise<ArcjetDecision>;
