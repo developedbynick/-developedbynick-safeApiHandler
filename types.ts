@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { ArcjetDecision } from "@arcjet/node";
+import arcjet, { ArcjetDecision } from "@arcjet/node";
 import z from "zod";
+import safeApiHandler from ".";
 
 export type DataPayloadLocation = "body" | "query" | "params";
 
@@ -13,7 +14,7 @@ export type SafeApiHandlerProps<
 	ZSchema extends z.ZodType, //
 	IsProtected extends boolean,
 	PayloadLocation extends DataPayloadLocation,
-	Req extends Request<
+	Req extends Request<any, any, any, any> = Request<
 		PayloadLocation extends "params" ? z.infer<ZSchema> : {}, //
 		undefined,
 		PayloadLocation extends "body" ? z.infer<ZSchema> : {},
@@ -21,7 +22,7 @@ export type SafeApiHandlerProps<
 	>
 > = {
 	handler: (req: Req, res: Response, next: NextFunction) => void;
-	arcjetDecision?: ArcjetDecisionProps<Req>;
+	arcjetDecision?: (req: Req) => Promise<ArcjetDecision>;
 	validator?: ZSchema;
 	isProtected?: IsProtected;
 	location?: PayloadLocation;
