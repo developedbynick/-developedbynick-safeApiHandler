@@ -25,7 +25,7 @@ export type SafeApiHandlerProps<
 			? z.infer<ZSchema> extends unknown
 				? z.infer<ZSchema>
 				: {}
-			: {},
+			: {}, //,
 		PayloadLocation extends "query"
 			? z.infer<ZSchema> extends unknown
 				? z.infer<ZSchema>
