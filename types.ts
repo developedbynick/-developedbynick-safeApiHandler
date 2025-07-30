@@ -15,10 +15,22 @@ export type SafeApiHandlerProps<
 	IsProtected extends boolean,
 	PayloadLocation extends DataPayloadLocation,
 	Req extends Request<any, any, any, any> = Request<
-		PayloadLocation extends "params" ? z.infer<ZSchema> : {}, //
+		PayloadLocation extends "params"
+			? z.infer<ZSchema> extends unknown
+				? {}
+				: z.infer<ZSchema>
+			: {}, //
 		undefined,
-		PayloadLocation extends "body" ? z.infer<ZSchema> : {},
-		PayloadLocation extends "query" ? z.infer<ZSchema> : {}
+		PayloadLocation extends "body"
+			? z.infer<ZSchema> extends unknown
+				? {}
+				: z.infer<ZSchema>
+			: {},
+		PayloadLocation extends "query"
+			? z.infer<ZSchema> extends unknown
+				? {}
+				: z.infer<ZSchema>
+			: {}
 	>
 > = {
 	handler: (props: {
@@ -34,7 +46,7 @@ export type SafeApiHandlerProps<
 };
 
 export type StructuredResponseType<Payload extends object> = {
-	statusCode: number;
+	statusCode?: number;
 	date: string;
 	environment: "development" | "production" | "preview";
 	data: Payload;

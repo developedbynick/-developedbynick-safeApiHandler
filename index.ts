@@ -48,11 +48,11 @@ export default function safeApiHandler<
 
 export const structuredResponse = <T extends object>(
 	res: Response,
-	props: Pick<StructuredResponseType<T>, "statusCode" | "data">
+	{ statusCode = 200, data }: Pick<StructuredResponseType<T>, "statusCode" | "data">
 ) =>
-	res.status(props.statusCode).json({
-		statusCode: props.statusCode,
+	res.status(statusCode).json({
+		statusCode,
 		date: new Date().toLocaleDateString(),
 		environment: process.env.NODE_ENV,
-		data: props.data,
+		data,
 	});
