@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import arcjet, { ArcjetDecision } from "@arcjet/node";
+import { ArcjetDecision } from "@arcjet/node";
 import z from "zod";
-import safeApiHandler from ".";
 
 export type DataPayloadLocation = "body" | "query" | "params";
 
@@ -10,38 +9,43 @@ export type ArcjetDecisionProps<Req> = (args: {
 	fingerprint: string;
 }) => Promise<ArcjetDecision>;
 
+type ExpressRequest<
+	ZSchema extends z.ZodType,
+	PayloadLocation extends DataPayloadLocation
+> = Request<
+	PayloadLocation extends "params"
+		? z.infer<ZSchema> extends unknown
+			? {}
+			: z.infer<ZSchema>
+		: {}, // This is for the params
+	undefined,
+	PayloadLocation extends "body"
+		? z.infer<ZSchema> extends unknown
+			? {}
+			: z.infer<ZSchema>
+		: {},
+	PayloadLocation extends "query"
+		? z.infer<ZSchema> extends unknown
+			? {}
+			: z.infer<ZSchema>
+		: {}
+>;
+
 export type SafeApiHandlerProps<
-	ZSchema extends z.ZodType, //
-	IsProtected extends boolean,
-	PayloadLocation extends DataPayloadLocation,
-	Req extends Request<any, any, any, any> = Request<
-		PayloadLocation extends "params"
-			? z.infer<ZSchema> extends unknown
-				? z.infer<ZSchema>
-				: {}
-			: {}, //
-		undefined,
-		PayloadLocation extends "body"
-			? z.infer<ZSchema> extends unknown
-				? z.infer<ZSchema>
-				: {}
-			: {}, //,
-		PayloadLocation extends "query"
-			? z.infer<ZSchema> extends unknown
-				? z.infer<ZSchema>
-				: {}
-			: {}
-	>
+	ZSchema extends z.ZodType,
+	PayloadLocation extends DataPayloadLocation
 > = {
 	handler: (props: {
-		req: Req;
+		req: ExpressRequest<ZSchema, PayloadLocation>;
 		res: Response;
 		next: NextFunction;
 		decision?: ArcjetDecision;
 	}) => void;
-	arcjetDecision?: (req: Req, fingerprint: string) => Promise<ArcjetDecision>;
+	arcjetDecision?: (
+		req: ExpressRequest<ZSchema, PayloadLocation>,
+		fingerprint: string
+	) => Promise<ArcjetDecision>;
 	validator?: ZSchema;
-	isProtected?: IsProtected;
 	location?: PayloadLocation;
 };
 

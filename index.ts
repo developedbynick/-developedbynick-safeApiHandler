@@ -6,9 +6,8 @@ import { z } from "zod";
 
 export default function safeApiHandler<
 	ZSchema extends z.ZodType, //
-	IsProtected extends boolean,
 	PayloadLocation extends DataPayloadLocation
->({ location, ...props }: SafeApiHandlerProps<ZSchema, IsProtected, PayloadLocation>) {
+>({ location, ...props }: SafeApiHandlerProps<ZSchema, PayloadLocation>) {
 	return async (req: Request<any, any, any, any>, res: Response, next: NextFunction) => {
 		try {
 			// Validate data provided to route handler
