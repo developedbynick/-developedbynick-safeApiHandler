@@ -17,19 +17,19 @@ export type SafeApiHandlerProps<
 	Req extends Request<any, any, any, any> = Request<
 		PayloadLocation extends "params"
 			? z.infer<ZSchema> extends unknown
-				? {}
-				: z.infer<ZSchema>
+				? z.infer<ZSchema>
+				: {}
 			: {}, //
 		undefined,
 		PayloadLocation extends "body"
 			? z.infer<ZSchema> extends unknown
-				? {}
-				: z.infer<ZSchema>
+				? z.infer<ZSchema>
+				: {}
 			: {},
 		PayloadLocation extends "query"
 			? z.infer<ZSchema> extends unknown
-				? {}
-				: z.infer<ZSchema>
+				? z.infer<ZSchema>
+				: {}
 			: {}
 	>
 > = {
