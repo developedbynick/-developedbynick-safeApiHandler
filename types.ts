@@ -9,27 +9,18 @@ export type ArcjetDecisionProps<Req> = (args: {
 	fingerprint: string;
 }) => Promise<ArcjetDecision>;
 
-type ExpressRequest<
+export type ExpressRequest<
 	ZSchema extends z.ZodType,
-	PayloadLocation extends DataPayloadLocation
-> = Request<
+	PayloadLocation extends DataPayloadLocation | undefined
+> = PayloadLocation extends "body" // When the location is req.body
+	? Request<any, any, z.infer<ZSchema>>
+	: // When the location is req.params
 	PayloadLocation extends "params"
-		? z.infer<ZSchema> extends unknown
-			? {}
-			: z.infer<ZSchema>
-		: {}, // This is for the params
-	undefined,
-	PayloadLocation extends "body"
-		? z.infer<ZSchema> extends unknown
-			? {}
-			: z.infer<ZSchema>
-		: {},
+	? Request<z.infer<ZSchema>, any, any>
+	: // When the location is req.query
 	PayloadLocation extends "query"
-		? z.infer<ZSchema> extends unknown
-			? {}
-			: z.infer<ZSchema>
-		: {}
->;
+	? Request<any, any, any, z.infer<ZSchema>>
+	: Request;
 
 export type SafeApiHandlerProps<
 	ZSchema extends z.ZodType,
