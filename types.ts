@@ -8,16 +8,15 @@ export type DataPayloadLocation = "body" | "params" | "query" | undefined;
 export type DetermineCorrectRequestType<
 	ZSchema = z.ZodType,
 	PayloadLocation extends DataPayloadLocation = undefined
-> = PayloadLocation extends undefined
-	? Request
-	: // When req.params is selected
-	PayloadLocation extends "params"
+> = PayloadLocation extends "params"
 	? Request<z.infer<ZSchema>>
 	: // When the location is on req.body
 	PayloadLocation extends "body"
 	? Request<any, any, z.infer<ZSchema>>
-	: // When the location is any other value, which in this case is req.query
-	  Request<any, any, any, z.infer<ZSchema>>;
+	: // When the location is on req.query
+	PayloadLocation extends "query"
+	? Request<any, any, any, z.infer<ZSchema>>
+	: Request;
 
 type RequestHandlerProps<ZSchema extends z.ZodType | undefined = undefined, Location extends DataPayloadLocation = undefined> = {
 	req: DetermineCorrectRequestType<ZSchema, Location>;
@@ -26,7 +25,7 @@ type RequestHandlerProps<ZSchema extends z.ZodType | undefined = undefined, Loca
 	decision: ArcjetDecision;
 };
 
-export type SafeApiHandlerProps<Location extends DataPayloadLocation = undefined, ZSchema extends z.ZodType | undefined = undefined> = {
+export type SafeApiHandlerProps<ZSchema extends z.ZodType, Location extends DataPayloadLocation = undefined> = {
 	handler: (props: RequestHandlerProps<ZSchema, Location>) => void;
 	arcjetDecision: (req: DetermineCorrectRequestType<ZSchema, Location>, fingerprint: string) => Promise<ArcjetDecision>;
 	validator?: ZSchema;

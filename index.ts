@@ -1,4 +1,4 @@
-import arcjet, { ArcjetDecision } from "@arcjet/node";
+import { ArcjetDecision } from "@arcjet/node";
 import { DataPayloadLocation, DetermineCorrectRequestType, SafeApiHandlerProps, StructuredResponseType } from "./types";
 import { NextFunction, Response } from "express";
 import { BadRequest } from "http-errors";
@@ -6,8 +6,8 @@ import { z } from "zod";
 
 export default function safeApiHandler<
 	ZSchema extends z.ZodType, //
-	PayloadLocation extends DataPayloadLocation
->({ location, ...props }: SafeApiHandlerProps<PayloadLocation, ZSchema>) {
+	PayloadLocation extends DataPayloadLocation = undefined
+>({ location = undefined, ...props }: SafeApiHandlerProps<ZSchema, PayloadLocation>) {
 	return async (req: DetermineCorrectRequestType<ZSchema, PayloadLocation>, res: Response, next: NextFunction) => {
 		try {
 			// Validate data provided to route handler
