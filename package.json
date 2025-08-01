@@ -1,6 +1,6 @@
 {
 	"name": "express-safe-api-handler-ns",
-	"version": "2.0.7",
+	"version": "2.1.0",
 	"description": "A type-safe Express middleware wrapper for schema validation, fingerprint enforcement, and optional Arcjet-based access control using Zod.",
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",

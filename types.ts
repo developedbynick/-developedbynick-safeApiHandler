@@ -1,50 +1,41 @@
-import {NextFunction, Request, Response} from "express";
-import {ArcjetDecision} from "@arcjet/node";
+import { ArcjetDecision } from "@arcjet/node";
+import { NextFunction, Request, Response } from "express";
 import z from "zod";
 
-export type DataPayloadLocation = "body" | "query" | "params";
+export type DataPayloadLocation = "body" | "params" | "query" | undefined;
 
-export type ArcjetDecisionProps<Req> = (args: {
-    req: Req;
-    fingerprint: string;
-}) => Promise<ArcjetDecision>;
+// This utility takes in a zod schema as well as the payload location where that data will be stored. It then infers the type of the schema and places
+export type DetermineCorrectRequestType<
+	ZSchema = z.ZodType,
+	PayloadLocation extends DataPayloadLocation = undefined
+> = PayloadLocation extends undefined
+	? Request
+	: // When req.params is selected
+	PayloadLocation extends "params"
+	? Request<z.infer<ZSchema>>
+	: // When the location is on req.body
+	PayloadLocation extends "body"
+	? Request<any, any, z.infer<ZSchema>>
+	: // When the location is any other value, which in this case is req.query
+	  Request<any, any, any, z.infer<ZSchema>>;
 
-export type ExpressRequest<
-    ZSchema extends z.ZodType,
-    PayloadLocation extends DataPayloadLocation | undefined
-> = PayloadLocation extends "body" // When the location is req.body
-    ? Request<any, any, ProperTypePicker<ZSchema, {}>>
-    : // When the location is req.params
-    PayloadLocation extends "params"
-        ? Request<ProperTypePicker<ZSchema, {}>, any, any>
-        : // When the location is req.query
-        PayloadLocation extends "query"
-            ? Request<any, any, any, ProperTypePicker<ZSchema, {}>>
-            :  Request;
-
-type ProperTypePicker<ZSchema extends z.ZodType, ReturnType = {}> = z.infer<ZSchema> extends unknown ? ReturnType : z.infer<ZSchema>
-
-export type SafeApiHandlerProps<
-    ZSchema extends z.ZodType,
-    PayloadLocation extends DataPayloadLocation
-> = {
-    handler: (props: {
-        req: ExpressRequest<ZSchema, PayloadLocation>;
-        res: Response;
-        next: NextFunction;
-        decision?: ArcjetDecision;
-    }) => void;
-    arcjetDecision?: (
-        req: ExpressRequest<ZSchema, PayloadLocation>,
-        fingerprint: string
-    ) => Promise<ArcjetDecision>;
-    validator?: ZSchema;
-    location?: PayloadLocation;
+type RequestHandlerProps<ZSchema extends z.ZodType | undefined = undefined, Location extends DataPayloadLocation = undefined> = {
+	req: DetermineCorrectRequestType<ZSchema, Location>;
+	res: Response;
+	next: NextFunction;
+	decision: ArcjetDecision;
 };
 
-export type StructuredResponseType<Payload extends object> = {
-    statusCode?: number;
-    date: string;
-    environment: "development" | "production" | "preview";
-    data: Payload;
+export type SafeApiHandlerProps<Location extends DataPayloadLocation = undefined, ZSchema extends z.ZodType | undefined = undefined> = {
+	handler: (props: RequestHandlerProps<ZSchema, Location>) => void;
+	arcjetDecision: (req: DetermineCorrectRequestType<ZSchema, Location>, fingerprint: string) => Promise<ArcjetDecision>;
+	validator?: ZSchema;
+	location?: Location;
+};
+
+export type StructuredResponseType<T extends object> = {
+	date: string;
+	statusCode: number;
+	environment: "production" | "development" | "preview";
+	data: T;
 };
