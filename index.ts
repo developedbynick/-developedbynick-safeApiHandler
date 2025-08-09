@@ -3,7 +3,7 @@ import { DataPayloadLocation, DetermineCorrectRequestType, SafeApiHandlerProps, 
 import { NextFunction, Response } from "express";
 import { BadRequest } from "http-errors";
 import { z } from "zod";
-
+export * as Types from "./types";
 export default function safeApiHandler<
 	ZSchema extends z.ZodType, //
 	PayloadLocation extends DataPayloadLocation = undefined
