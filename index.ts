@@ -48,6 +48,7 @@ export const structuredResponse = <T extends object>(
 	{ statusCode = 200, data = {} as T }: Pick<StructuredResponseType<T>, "statusCode" | "data">
 ) =>
 	res.status(statusCode).json({
+		success: statusCode >= 399 ? false : true,
 		statusCode,
 		date: new Date().toLocaleDateString(),
 		environment: process.env.NODE_ENV,

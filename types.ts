@@ -33,6 +33,7 @@ export type SafeApiHandlerProps<ZSchema extends z.ZodType, Location extends Data
 };
 
 export type StructuredResponseType<T extends object> = {
+	success: boolean;
 	date: string;
 	statusCode: number;
 	environment: "production" | "development" | "preview";
